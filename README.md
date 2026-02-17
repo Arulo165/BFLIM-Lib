@@ -1,4 +1,4 @@
-# BflimTool
+# Bflim-Lib
 
 A high-performance C++ library for parsing, de-swizzling, and re-encoding **BFLIM** (Binary Layout File for Images) files. This tool is specifically designed to handle textures from Nintendo Wii U and 3DS titles, supporting complex hardware-specific tiling modes.
 
