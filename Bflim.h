@@ -1,57 +1,86 @@
-#ifndef BFLIM_READER_H
-#define BFLIM_READER_H
-
-#include <vector>
+#pragma once
 #include <string>
-#include <cstdint>
+#include <vector>
+#include <types.h>
+#include <BflimFormats.h>
+#include <ninTexUtils/gx2/gx2Surface.h>
 
-namespace BflimLib {
+class Bflim
+{
+public:
+    bool isValid(const std::vector<u8>& data);
+    void parseImageInformation(const std::vector<u8>& data);
+    void parseBinary(const std::vector<u8>& data);
 
-    // Formate laut Wexos's Wiki 
-    enum class TextureFormat : uint8_t {
-        L8 = 0x00,
-        RGB565 = 0x05,
-        RGBX8 = 0x06,
-        RGBA8 = 0x09,
-        BC1 = 0x0C, // DXT1
-        BC3 = 0x0E, // DXT5
-        RGBA8_SRGB = 0x14
-    };
+    std::vector<u8> deswizzleLinear(const std::vector<u8>& data , u32 Bpp);
+    std::vector<u8> deswizzleMicroTiled(const std::vector<u8>& data, u32 Bpp);
+    std::vector<u8> deswizzleMacroTiled(const std::vector<u8>& data, u32 Bpp);
 
-    struct BflimHeader {
-        char magic[4];       // "FLIM" [cite: 16]
-        uint16_t bom;        // Byte Order Mark (0xFEFF für Wii U) [cite: 16]
-        uint16_t headerSize; // 0x14 [cite: 16]
-        uint32_t version;    // [cite: 16]
-        uint32_t fileSize;   // [cite: 16]
-        uint16_t blockCount; // Immer 1 [cite: 16]
-    };
+    std::vector<u8> getDeswizzledRGBA(const std::vector<u8>& data);
+    GX2SurfaceFormat bflimFormatToGX2(u8 bflimFormat)const; 
 
-    struct ImagBlock {
-        char magic[4];       // "imag" 
-        uint32_t blockSize;  // 
-        uint16_t width;      // 
-        uint16_t height;     // 
-        uint16_t alignment;  // 
-        uint8_t format;      // TextureFormat 
-        uint8_t swizzleTile; // SSSTTTTT 
-        uint32_t dataSize;   // 
-    };
+    std::vector<u8> decodeRGBA8(const std::vector<u8>& data);
+    std::vector<u8> decodeBC1(const std::vector<u8>& data);
+    std::vector<u8> decodeBC2(const std::vector<u8>& data);
+    std::vector<u8> decodeBC3(const std::vector<u8>& data);
+    std::vector<u8> decodeBC4L(const std::vector<u8>& data);
+    std::vector<u8> decodeBC4A(const std::vector<u8>& data);
+    std::vector<u8> decodeBC5(const std::vector<u8>& data);
+    std::vector<u8> decodeL8(const std::vector<u8>& data);
+    std::vector<u8> decodeLA8(const std::vector<u8>& data);
 
-    class BflimReader {
-    public:
-        bool load(const std::string& filePath);
-        std::vector<uint8_t> getLinearPixels();
-        
-    private:
-        BflimHeader header;
-        ImagBlock imag;
-        std::vector<uint8_t> rawData;
-        
-        uint32_t computeSwizzleAddr(uint32_t x, uint32_t y, uint32_t width, uint32_t bpp, uint8_t tileMode);
-        uint16_t swap16(uint16_t val);
-        uint32_t swap32(uint32_t val);
-    };
-}
+    GX2Surface createGX2Surface() const;
 
-#endif
+    void fillBlock(const std::vector<u8>& rgbaData, u8* block, u32 startX, u32 startY);
+    
+    bool replaceWithRGBA(const std::vector<u8>& rgbaData);
+
+    std::vector<u8> swizzleMacroTiled(const std::vector<u8>& linearData);
+    std::vector<u8> encodeRGBA8(const std::vector<u8>& rgbaData);
+
+    std::vector<u8> encodeBC3(const std::vector<u8>& rgbaData);
+    std::vector<u8> encodeBC1(const std::vector<u8>& rgbaData);
+
+    void updateRawData();
+
+    u16 getImageWidth()
+    {
+        return mImageWidth;
+    }
+
+    u16 getImageHeight()
+    {
+        return mImageHeight;
+    }
+
+    Format getImageFormat()
+    {
+        return mImageFormat;
+    }
+
+    std::vector<u8> getImageData()
+    {
+        return mImageData;
+    }
+
+    u8 getTileMode()
+    {
+        return mTileMode;
+    }
+
+    std::vector<u8> getRawData()
+    {
+        return mRawData;
+    }
+
+private:
+    std::vector<u8> mImageData;
+    u16 mImageWidth;
+    u16 mImageHeight;
+    Format mImageFormat;
+    u8 mTileMode;
+    u8 mSwizzle;
+    u8 mPipeSwizzle; 
+    u8 mBankSwizzle; 
+    std::vector<u8> mRawData;
+};
