@@ -224,7 +224,6 @@ std::vector<u8> Bflim::decodeBC4L(const std::vector<u8>& data) {
     std::vector<u8> output(mImageWidth * mImageHeight * 4);
     BCn_DecompressBC4U(mImageWidth, mImageHeight, data.data(), output.data());
     
-    // BC4 gibt nur R Channel → als Graustufen anzeigen
     for (size_t i = 0; i < mImageWidth * mImageHeight; i++) {
         u8 r = output[i * 4 + 0];
         output[i * 4 + 0] = r;  // R
@@ -253,8 +252,7 @@ std::vector<u8> Bflim::decodeBC4A(const std::vector<u8>& data) {
 std::vector<u8> Bflim::decodeBC5(const std::vector<u8>& data) {
     std::vector<u8> raw(mImageWidth * mImageHeight * 4);
     BCn_DecompressBC5U(mImageWidth, mImageHeight, data.data(), raw.data());
-    
-    // Debug: Zeige ersten Pixel
+
     std::cout << "BC5 Pixel 0: R=" << (int)raw[0] 
               << " G=" << (int)raw[1]
               << " B=" << (int)raw[2]
@@ -354,7 +352,6 @@ std::vector<u8> Bflim::encodeRGBA8(const std::vector<u8>& rgbaData) {
 
 std::vector<u8> Bflim::swizzleMacroTiled(const std::vector<u8>& linearData) {
     
-    // Source = Linear
     GX2Surface srcSurf;
     std::memset(&srcSurf, 0, sizeof(GX2Surface));
     srcSurf.dim = GX2_SURFACE_DIM_2D;
@@ -369,8 +366,7 @@ std::vector<u8> Bflim::swizzleMacroTiled(const std::vector<u8>& linearData) {
     srcSurf.swizzle = 0;
     GX2CalcSurfaceSizeAndAlignment(&srcSurf);
     srcSurf.imagePtr.set(const_cast<u8*>(linearData.data()));
-    
-    // Dest = Swizzled
+
     GX2Surface dstSurf = createGX2Surface();
     GX2CalcSurfaceSizeAndAlignment(&dstSurf);
     
@@ -396,15 +392,12 @@ bool Bflim::replaceWithRGBA(const std::vector<u8>& rgbaData) {
         case 0x09: encoded = encodeRGBA8(rgbaData); break;
         case 0x0C: encoded = encodeBC1(rgbaData); break;
         case 0x0E: encoded = encodeBC3(rgbaData); break;
-        // Für BC4/BC5 müsstest du spezialisierte Encoder wie 'cmp_core' 
-        // oder 'ISP' nutzen, da stb_dxt nur BC1 und BC3 kann.
         default:
             std::cerr << "Format 0x" << std::hex << (int)mImageFormat.mId 
                       << " encoding not implemented!" << std::dec << std::endl;
             return false;
     }
 
-    // Swizzle das komprimierte Ergebnis wieder in das Wii U / 3DS Layout
     std::vector<u8> swizzled = swizzleMacroTiled(encoded);
     
     mImageData = swizzled;
