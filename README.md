@@ -25,9 +25,9 @@ To build this library, you will need the following dependencies:
 
 | Dependency | Purpose |
 | :--- | :--- |
-| **[ninTexUtils](https://github.com/AboodXD/ninTexUtils)** | Core GX2 surface management and hardware swizzling logic. |
-| **[bcdec](https://github.com/vurtun/bcdec)** | Single-header C library for BC1-BC5 decompression. |
-| **[stb_dxt](https://github.com/nothings/stb)** | Real-time DXT1/DXT5 (BC1/BC3) compression for texture replacement. |
+| **[ninTexUtils](https://github.com/aboood40091/ninTexUtils/tree/cpp)** | Core GX2 surface management and hardware swizzling logic. |
+| **[bcdec](https://github.com/iOrange/bcdec)** | Single-header C library for BC1-BC5 decompression. |
+| **[stb_dxt](https://github.com/nothings/stb/blob/master/stb_dxt.h)** | Real-time DXT1/DXT5 (BC1/BC3) compression for texture replacement. |
 | **[BinaryUtils](https://github.com/Arulo165/BinaryUtils)** | Internal project headers for Big-Endian/Little-Endian data handling. |
 
 ## Supported Formats
