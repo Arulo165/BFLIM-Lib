@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <ninTexUtils/gx2/gx2Surface.h>
 #include <memory>
-#include <bcdec.h>
 #include <ninTexUtils/bcn/decompress.h>
 
 bool Bflim::isValid(const std::vector<u8>& data)
